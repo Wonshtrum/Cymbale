@@ -11,10 +11,29 @@ let texIndex;
 //CPU SIDE DATA
 const floatSize = 4;
 const vertData = 3+4+2+1;
-const quadBuffer = new Float32Array(maxVertexCount*vertData);
+const quadBuffer = new Float32Array(maxVertexCount*vertData).fill(0);
 const textureArray = Array(maxTextureCount).fill(0)
 const indexBuffer = new Uint16Array(maxIndexCount);
 let offset = 0;
+for (let i = 0 ; i < maxQuadCount ; i++) {
+	quadBuffer[offset + 2] = 0;
+	quadBuffer[offset + 7] = 0;
+	quadBuffer[offset + 8] = 1;
+	offset += vertData;
+	quadBuffer[offset + 2] = 0;
+	quadBuffer[offset + 7] = 1;
+	quadBuffer[offset + 8] = 1;
+	offset += vertData;
+	quadBuffer[offset + 2] = 0;
+	quadBuffer[offset + 7] = 1;
+	quadBuffer[offset + 8] = 0;
+	offset += vertData;
+	quadBuffer[offset + 2] = 0;
+	quadBuffer[offset + 7] = 0;
+	quadBuffer[offset + 8] = 0;
+	offset += vertData;
+}
+offset = 0;
 for (let i = 0 ; i < maxIndexCount ;  i+=6) {
 	indexBuffer[i + 0] = offset + 0;
 	indexBuffer[i + 1] = offset + 1;
@@ -101,51 +120,57 @@ let drawQuad = function(x, y, w, h, r, g, b, a, tex) {
 		}
 	}
 
+	/*quadBuffer.set([
+		x  , y  , 0, r, g, b, a, 0, 1, slot,
+		x+w, y  , 0, r, g, b, a, 1, 1, slot,
+		x+w, y+h, 0, r, g, b, a, 1, 0, slot,
+		x  , y+h, 0, r, g, b, a, 0, 0, slot,
+	], dataIndex);*/
 	quadBuffer[dataIndex + 0] = x;
 	quadBuffer[dataIndex + 1] = y;
-	quadBuffer[dataIndex + 2] = 0;
+	//quadBuffer[dataIndex + 2] = 0;
 	quadBuffer[dataIndex + 3] = r;
 	quadBuffer[dataIndex + 4] = g;
 	quadBuffer[dataIndex + 5] = b;
 	quadBuffer[dataIndex + 6] = a;
-	quadBuffer[dataIndex + 7] = 0;
-	quadBuffer[dataIndex + 8] = 1;
+	//quadBuffer[dataIndex + 7] = 0;
+	//quadBuffer[dataIndex + 8] = 1;
 	quadBuffer[dataIndex + 9] = slot;
 	dataIndex += vertData;
 
 	quadBuffer[dataIndex + 0] = x+w;
 	quadBuffer[dataIndex + 1] = y;
-	quadBuffer[dataIndex + 2] = 0;
+	//quadBuffer[dataIndex + 2] = 0;
 	quadBuffer[dataIndex + 3] = r;
 	quadBuffer[dataIndex + 4] = g;
 	quadBuffer[dataIndex + 5] = b;
 	quadBuffer[dataIndex + 6] = a;
-	quadBuffer[dataIndex + 7] = 1;
-	quadBuffer[dataIndex + 8] = 1;
+	//quadBuffer[dataIndex + 7] = 1;
+	//quadBuffer[dataIndex + 8] = 1;
 	quadBuffer[dataIndex + 9] = slot;
 	dataIndex += vertData;
 
 	quadBuffer[dataIndex + 0] = x+w;
 	quadBuffer[dataIndex + 1] = y+h;
-	quadBuffer[dataIndex + 2] = 0.0;
+	//quadBuffer[dataIndex + 2] = 0;
 	quadBuffer[dataIndex + 3] = r;
 	quadBuffer[dataIndex + 4] = g;
 	quadBuffer[dataIndex + 5] = b;
 	quadBuffer[dataIndex + 6] = a;
-	quadBuffer[dataIndex + 7] = 1;
-	quadBuffer[dataIndex + 8] = 0;
+	//quadBuffer[dataIndex + 7] = 1;
+	//quadBuffer[dataIndex + 8] = 0;
 	quadBuffer[dataIndex + 9] = slot;
 	dataIndex += vertData;
 
 	quadBuffer[dataIndex + 0] = x;
 	quadBuffer[dataIndex + 1] = y+h;
-	quadBuffer[dataIndex + 2] = 0;
+	//quadBuffer[dataIndex + 2] = 0;
 	quadBuffer[dataIndex + 3] = r;
 	quadBuffer[dataIndex + 4] = g;
 	quadBuffer[dataIndex + 5] = b;
 	quadBuffer[dataIndex + 6] = a;
-	quadBuffer[dataIndex + 7] = 0;
-	quadBuffer[dataIndex + 8] = 0;
+	//quadBuffer[dataIndex + 7] = 0;
+	//quadBuffer[dataIndex + 8] = 0;
 	quadBuffer[dataIndex + 9] = slot;
 	dataIndex += vertData;
 	quadIndex ++;
@@ -155,9 +180,9 @@ let drawQuad = function(x, y, w, h, r, g, b, a, tex) {
 
 const render = function() {
 	beginBatch();
-	for (let x = -200 ; x  < 200 ; x+=5) {
-		for (let y = -200 ; y < 200 ; y+=5) {
-			drawQuad(x, y, 1, 1, (x+400)/800, (y+400)/800, 0.5, 1);
+	for (let x = -200 ; x  < 200 ; x+=2) {
+		for (let y = -200 ; y < 200 ; y+=2) {
+			drawQuad(x, y, 2, 2, (x+400)/800, (y+400)/800, 0.5, 1, "img");
 		}
 	}
 	drawQuad(0,0,80,80,1,1,1,1,"img");
