@@ -182,7 +182,7 @@ const render = function() {
 	beginBatch();
 	for (let x = -200 ; x  < 200 ; x+=2) {
 		for (let y = -200 ; y < 200 ; y+=2) {
-			drawQuad(x, y, 2, 2, (x+400)/800, (y+400)/800, 0.5, 1, "img");
+			drawQuad(x, y, 2, 2, (x+400)/800, (y+400)/800, 0.5, 1);
 		}
 	}
 	drawQuad(0,0,80,80,1,1,1,1,"img");
