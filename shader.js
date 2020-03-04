@@ -45,14 +45,15 @@ uniform int u_nbLights;
 
 void main(void) {
 	int index = int(v_texIndex);
-	float min = 100.0;
+	vec3 power = vec3(0.5);
 	float d;
 	for (int i = 0 ; i < u_nbLights ; i++) {
 		d = distance(vec3(u_lights[i].xy,0), vec3(v_position,0));
-		if (d < min) min = d;
+		//if (d < min) min = d;
+		if (d <= u_lights[i].z) power += u_colors[i]*(1.0-d/u_lights[i].z)*0.75;
 	}
-	//min *= float(nbLights);
-	fragColor = texture(u_textures[index], v_texCoord)*vec4(v_color.xyz*(1.5-min/100.0),v_color.w);
+	//fragColor = texture(u_textures[index], v_texCoord)*vec4(v_color.xyz*power,v_color.w);
+	fragColor = texture(u_textures[index], v_texCoord)*v_color*vec4(power,1)+vec4(power-0.5,0);
 }`;
 
 //COMPILATION
@@ -81,8 +82,8 @@ const uNbLights = gl.getUniformLocation(shaderProgram, 'u_nbLights');
 gl.uniform2f(uScreen, width/2, height/2);
 gl.uniform1iv(uTextures, [...Array(10).keys()]);
 
-let lights = [[50,50,100],[-30,20,50]];
-let colors = [[0.5,0.5,1],[0.8,02,0.5]];
+let lights = [[70,70,50],[-30,-20,150]];
+let colors = [[0,0.5,1],[0.8,0,0]];
 gl.uniform1i(uNbLights, 2);
 gl.uniform3fv(uLights, lights.flat());
 gl.uniform3fv(uColors, colors.flat());

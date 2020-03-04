@@ -190,4 +190,4 @@ const render = function() {
 	flushBatch();
 }
 
-setInterval(render, 30);
+setInterval(render, 20);
