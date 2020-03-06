@@ -180,9 +180,10 @@ let drawQuad = function(x, y, w, h, r, g, b, a, tex) {
 
 const render = function() {
 	beginBatch();
-	for (let x = -200 ; x  < 200 ; x+=2) {
-		for (let y = -200 ; y < 200 ; y+=2) {
-			drawQuad(x, y, 2, 2, (x+400)/800, (y+400)/800, 0.5, 1);
+	let c = 20;
+	for (let x = -200 ; x  < 200 ; x+=c) {
+		for (let y = -200 ; y < 200 ; y+=c) {
+			drawQuad(x, y, c, c, (x+400)/800, (y+400)/800, 0.5, 1);
 		}
 	}
 	drawQuad(0,0,80,80,1,1,1,1,"img");
