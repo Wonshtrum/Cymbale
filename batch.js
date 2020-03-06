@@ -175,20 +175,3 @@ let drawQuad = function(x, y, w, h, r, g, b, a, tex) {
 	dataIndex += vertData;
 	quadIndex ++;
 };
-
-
-
-const render = function() {
-	beginBatch();
-	let c = 20;
-	for (let x = -200 ; x  < 200 ; x+=c) {
-		for (let y = -200 ; y < 200 ; y+=c) {
-			drawQuad(x, y, c, c, (x+400)/800, (y+400)/800, 0.5, 1);
-		}
-	}
-	drawQuad(0,0,80,80,1,1,1,1,"img");
-	drawQuad(80,10,80,80,0,1,1,1,"img");
-	flushBatch();
-}
-
-setInterval(render, 20);
