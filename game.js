@@ -17,8 +17,9 @@ let xyOnMap = function(e) {
 
 canvas.onmousemove = function(e) {
 	let [x, y] = xyOnMapPixel(e);
-	lights[0][0] = x-width/2;
-	lights[0][1] = height/2-y;
+	let n = 0;
+	lights[n][0] = x-width/2;
+	lights[n][1] = height/2-y;
 	gl.uniform3fv(uLights, lights.flat());
 }
 

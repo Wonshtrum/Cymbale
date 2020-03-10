@@ -42,6 +42,10 @@ uniform vec3 u_colors[1024];
 uniform int u_nbLights;
 uniform int u_world[256];
 
+#define WALL3D
+#define SHARP 1.0
+#define WALLH 0.3
+
 bool wall(int x, int y, bool rev) {
 	return rev ? u_world[y+16*x] == 1 : u_world[x+16*y] == 1;
 }
@@ -54,17 +58,23 @@ float _line(float x0, float y0, float xl, float yl, bool rev) {
 	int j;
 	bool first = true;
 	float l = 1.0;
-	float c = 1.0;
-	bool sharp = false;
 	for (int i = int(xl) ; i != int(x0)+dx ; i += dx) {
 		j = int(J);
 		if ((!first || j == int(yl)) && wall(i,j,rev)) {
-			if (sharp || j == int(J+a) || wall(i,j+dy,rev) || wall(i-dx,j+dy,rev)) return 0.0;
-			l *= 1.0-c*(1.0-abs((J+a-float(j+(dy+1)/2))/a));
+#ifdef SHARP
+			if (j == int(J+a) || wall(i,j+dy,rev) || wall(i-dx,j+dy,rev)) return 0.0;
+			l *= 1.0-SHARP*(1.0-abs((J+a-float(j+(dy+1)/2))/a));
+#else
+			return 0.0;
+#endif
 		}
 		if (j != int(J+a) && dy*int(J+a) <= dy*int(y0) && wall(i,j+dy,rev)) {
-			if (sharp || wall(i+dx,j,rev) || wall(i+dx,j+dy,rev)) return 0.0;
-			l *= 1.0-c*abs((J+a-float(j+(dy+1)/2))/a);
+#ifdef SHARP
+			if (wall(i+dx,j,rev) || wall(i+dx,j+dy,rev)) return 0.0;
+			l *= 1.0-SHARP*abs((J+a-float(j+(dy+1)/2))/a);
+#else
+			return 0.0;
+#endif
 		}
 		J += a;
 		first = false;
@@ -75,35 +85,56 @@ float _line(float x0, float y0, float xl, float yl, bool rev) {
 }
 
 float line(float x0, float y0, float xl, float yl) {
-	if (wall(int(x0), int(y0), false) || wall(int(xl), int(yl), false)) return 0.0;
-	if (abs(yl-y0) > abs(xl-x0)) {
-		return _line(y0,x0,yl,xl,true);
+	float c = 1.0;
+#ifdef WALL3D
+	if (wall(int(x0),int(y0-WALLH),false)) return 0.0;
+	if (wall(int(xl),int(yl),false)) {
+		yl = float(int(yl))-0.001;
 	}
-	return _line(x0,y0,xl,yl,false);
+	if (wall(int(x0),int(y0),false)) {
+		if (float(int(y0)) < yl) return 0.0;
+		y0 = float(int(y0))-0.001;
+		c = 0.9;
+	}
+#else
+	if (wall(int(x0),int(y0),false) || wall(int(xl),int(yl),false)) return 0.0;
+#endif
+	if (abs(yl-y0) > abs(xl-x0)) {
+		return c*_line(y0,x0,yl,xl,true);
+	}
+	return c*_line(x0,y0,xl,yl,false);
 }
 
 void main(void) {
 	vec3 A;
 	int index = int(v_texIndex);
 	vec3 power = vec3(0.0);
-	float d;
-	float a;
 	float x = 16.0*(0.5+v_position.x/500.0);
 	float y = 16.0*(0.5+v_position.y/500.0);
 	float xl;
 	float yl;
-	float l;
-	for (int i = 0 ; i < u_nbLights ; i++) {
-		xl = 16.0*(0.5+u_lights[i].x/500.0);
-		yl = 16.0*(0.5+u_lights[i].y/500.0);
-		l = line(x, y, xl, yl);
-		if (l > 0.0) {
-			d = length(u_lights[i].xy-v_position)/250.0;
-			a = u_lights[i].z;
-			A = vec3(0.5,2.0*a,3.0*a*a);
-			a = 1.0/(A.x+A.y*d+A.z*d*d);
-			power += a*u_colors[i]*l;
+#ifndef WALL3D
+	if (!wall(int(x),int(y),false)) {
+#else
+	if (!wall(int(x),int(y-WALLH),false)) {
+#endif
+		float l;
+		float d;
+		float a;
+		for (int i = 0 ; i < u_nbLights ; i++) {
+			xl = 16.0*(0.5+u_lights[i].x/500.0);
+			yl = 16.0*(0.5+u_lights[i].y/500.0);
+			l = line(x, y, xl, yl);
+			if (l > 0.0) {
+				d = length(u_lights[i].xy-v_position)/250.0;
+				a = u_lights[i].z;
+				A = vec3(0.5,2.0*a,3.0*a*a);
+				a = 1.0/(A.x+A.y*d+A.z*d*d);
+				power += a*u_colors[i]*l;
+			}
 		}
+	} else {
+		power = vec3(1.0);
 	}
 	fragColor = texture(u_textures[index], v_texCoord)*v_color*vec4(power,1);
 }`;
@@ -136,16 +167,17 @@ const uWorld = gl.getUniformLocation(shaderProgram, 'u_world');
 gl.uniform2f(uScreen, width/2, height/2);
 gl.uniform1iv(uTextures, [...Array(10).keys()]);
 
-let lights = [[70,70,2],[-30,-20,4],[100,140,2]];
-let colors = [[0.8,0.8,0.8],[0.8,0.4,0],[0,1,1]];
-let test = false;
-if (!test) {
+let lights = [[70,70,1.5],[-30,-20,4],[100,140,2]];
+let colors = [[1,1,1],[0.8,0.4,0],[0,1,1]];
+let test = true;
+if (test) {
 	let n = 3;
-	lights = Array.from({length:n*n}, (e,i) => [-250+500*(i%n)/n,-250+500*(i-i%n)/(n*n),2]);
+	lights = Array.from({length:n*n}, (e,i) => [1+width*((i%n)/n-0.5),1+height*((i-i%n)/(n*n)-0.5),lights[i%3][2]]);
 	colors = Array.from({length:n*n}, (e,i) => colors[i%3]);
+	//lights[0][2] = 0.8;
 }
 let world = Array.from({length:256}, (e,i) => Math.sin(i*984651)*Math.cos(i*43)>0.5)
-if (test) {
+if (!test) {
 	world.fill(0);
 	world[137] = 1;
 	world[122] = 1;
