@@ -1,6 +1,6 @@
 # Cymbale
 Basic WebGL batch renderer
 
-![Example2D](example.png)
+![Example2D](img/example.png)
 
-![Example3D](example3D.png)
+![Example3D](img/example3D.png)

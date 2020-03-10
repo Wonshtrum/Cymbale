@@ -15,7 +15,7 @@ let loadTex = function(src, index) {
 	//Asynchronously load an image
 	let image = new Image();
 	//image.crossOrigin = "Anonymous";
-	image.src = src;
+	image.src = "img/"+src;
 	image.onload = function() {
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
